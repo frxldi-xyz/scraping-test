@@ -1,7 +1,7 @@
 # Gunakan image dasar Python
 FROM python:3.9-slim
 
-# Instal dependencies untuk Selenium dan Chrome
+# Instal dependencies untuk Selenium, Flask, dan Chrome
 RUN apt-get update && \
     apt-get install -y wget unzip xvfb && \
     wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
@@ -9,15 +9,17 @@ RUN apt-get update && \
     rm /tmp/chrome.deb && \
     rm -rf /var/lib/apt/lists/*
 
-# Instal Selenium dan SeleniumBase
-RUN pip install selenium seleniumbase undetected-chromedriver
+# Install pip dependencies
+RUN pip install flask seleniumbase undetected-chromedriver
 
-# Set variabel lingkungan untuk menggunakan Chrome secara headless
-ENV DISPLAY=:99
+# Set variabel lingkungan untuk Flask
+ENV FLASK_APP=app.py
 
-# Salin script Python ke container
+# Set working directory
 WORKDIR /usr/src/app
-COPY script.py .
 
-# Jalankan Xvfb dan script Python
-CMD Xvfb :99 -screen 0 1920x1080x16 & python script.py
+# Copy semua file ke container
+COPY . .
+
+# Jalankan Xvfb dan Flask
+CMD ["xvfb-run", "-a", "flask", "run", "--host=0.0.0.0"]
